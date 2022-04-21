@@ -1,19 +1,17 @@
-import { BaseSyntheticEvent, useState } from 'react';
+import { BaseSyntheticEvent, useMemo, useState } from 'react';
 import { Header } from 'har-format';
 
-export function useHeaders(headers: Header[]): [string[], Header[], (e: BaseSyntheticEvent) => void, (name: string) => void] {
+export function useHeaders(headers: Header[]): [Header[], Header[], (e: BaseSyntheticEvent) => void, (name: string) => void] {
    const [heads, setHeads] = useState<string[]>([]);
 
-   const headerTypes = headers.map(({ name }) => name);
+   const headerTypes = useMemo(() => [...headers], [headers]);
 
-   const headersToLog = headers.filter(({ name, value }) => {
-      return heads.includes(name) && { name, value };
-   });
+   const headersToLog = headers.filter(({ name, value }) => heads.includes(name) && { name, value });
 
    const handleAdd = (e: BaseSyntheticEvent) => {
       const header = e.target.innerHTML;
-      if (heads.includes(header)) return;
 
+      if (heads.includes(header)) return;
       return setHeads((h) => [...h, header]);
    };
 
