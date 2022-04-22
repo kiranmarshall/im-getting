@@ -1,7 +1,7 @@
 import { BaseSyntheticEvent, Dispatch, FC, SetStateAction, useEffect, useState } from 'react';
 import { Entry, Request, Response } from 'har-format';
 import { useHeaders } from '@/hooks';
-import { useErrors } from '@/contexts';
+import { useErrors, useMarkdown } from '@/contexts';
 
 enum HTTPMethods {
    GET = 'GET',
@@ -16,9 +16,11 @@ export const ErrorPanel = (error: Entry) => {
 
    const { removeError } = useErrors();
    const [showMarkdown, setShowMarkdown] = useState(false);
-   const [markdown, setMarkdown] = useState<Record<string, any>>({ method: request.method, url: request.url, status: response.status });
+   const { markdown, setMarkdown } = useMarkdown();
 
-   console.log(markdown);
+   useEffect(() => {
+      setMarkdown({ method: request.method, url: request.url, status: response.status });
+   }, [error]);
 
    if (!error) return <div>No error to display</div>;
 
@@ -35,7 +37,7 @@ export const ErrorPanel = (error: Entry) => {
 
             <div className=" flex-grow flex flex-col ">
                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
-                  <RequestPanel data={request} setMarkdown={setMarkdown} />
+                  <RequestPanel data={request} />
                   <ResponsePanel data={response} />
                </div>
             </div>
@@ -45,10 +47,11 @@ export const ErrorPanel = (error: Entry) => {
    );
 };
 
-const RequestPanel = ({ data, setMarkdown }: { data: Request; setMarkdown: Dispatch<SetStateAction<Record<string, any>>> }) => {
+const RequestPanel = ({ data }: { data: Request }) => {
    const { headers, method, url } = data;
 
    const [heads, headsToLog, handleAdd, handleRemove] = useHeaders(headers);
+   const { setMarkdown } = useMarkdown();
 
    const [expanded, setExpanded] = useState(false);
 

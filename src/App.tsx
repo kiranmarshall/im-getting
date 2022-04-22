@@ -1,5 +1,5 @@
 import { ErrorPanel, UploadPanel } from './components';
-import { useErrors } from './contexts';
+import { MarkdownProvider, useErrors } from './contexts';
 import './index.css';
 
 const App = () => {
@@ -14,7 +14,9 @@ const App = () => {
          {!!errors.length && <span>Total Errors: {errors.length}</span>}
 
          {errors.map((error) => (
-            <ErrorPanel key={error.time} {...error} />
+            <MarkdownProvider key={error.time}>
+               <ErrorPanel {...error} />
+            </MarkdownProvider>
          ))}
       </div>
    );
