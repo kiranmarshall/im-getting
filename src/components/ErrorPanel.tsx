@@ -1,4 +1,4 @@
-import { BaseSyntheticEvent, Dispatch, FC, SetStateAction, useEffect, useState } from 'react';
+import { BaseSyntheticEvent, FC, useEffect, useState } from 'react';
 import { Entry, Request, Response } from 'har-format';
 import { useHeaders } from '@/hooks';
 import { useErrors, useMarkdown } from '@/contexts';
@@ -51,14 +51,7 @@ const RequestPanel = ({ data }: { data: Request }) => {
    const { headers, method, url } = data;
 
    const [heads, headsToLog, handleAdd, handleRemove] = useHeaders(headers);
-   const { setMarkdown } = useMarkdown();
-
    const [expanded, setExpanded] = useState(false);
-
-   const handleAddClick = (e: BaseSyntheticEvent) => {
-      handleAdd(e);
-      setMarkdown((markdown) => ({ ...markdown, ...headsToLog }));
-   };
 
    return (
       <PanelContainer>
@@ -69,8 +62,8 @@ const RequestPanel = ({ data }: { data: Request }) => {
 
          <Method method={method} />
          <Url url={url} />
-         {headsToLog.map(({ name, value }, index) => (
-            <AddedHeader key={`${name}${index}`} name={name} value={value} onClick={() => handleRemove(name)} />
+         {headsToLog.map((header, index) => (
+            <AddedHeader key={`${header.name}${index}`} name={header.name} value={header.value} onClick={() => handleRemove(header)} />
          ))}
 
          {expanded && (
@@ -79,7 +72,9 @@ const RequestPanel = ({ data }: { data: Request }) => {
                   const exists = headsToLog.includes(header);
 
                   return (
-                     !exists && <HeaderToAdd picked={false} key={`${header.name}${index}`} header={header.name} onClick={handleAddClick} />
+                     !exists && (
+                        <HeaderToAdd picked={false} key={`${header.name}${index}`} header={header.name} onClick={() => handleAdd(header)} />
+                     )
                   );
                })}
             </PanelList>
@@ -102,8 +97,8 @@ const ResponsePanel = ({ data }: { data: Response }) => {
          </div>
 
          <span>status: {status}</span>
-         {headsToLog.map(({ name, value }, index) => (
-            <AddedHeader key={`${name}${index}`} name={name} value={value} onClick={() => handleRemove(name)} />
+         {headsToLog.map((header, index) => (
+            <AddedHeader key={`${header.name}${index}`} name={header.name} value={header.value} onClick={() => handleRemove(header)} />
          ))}
 
          {expanded && (
@@ -111,7 +106,11 @@ const ResponsePanel = ({ data }: { data: Response }) => {
                {heads.map((header, index) => {
                   const exists = headsToLog.includes(header);
 
-                  return !exists && <HeaderToAdd picked={false} key={`${header.name}${index}`} header={header.name} onClick={handleAdd} />;
+                  return (
+                     !exists && (
+                        <HeaderToAdd picked={false} key={`${header.name}${index}`} header={header.name} onClick={() => handleAdd(header)} />
+                     )
+                  );
                })}
             </PanelList>
          )}
