@@ -15,14 +15,11 @@ export const ErrorPanel = (error: Entry) => {
    const { request, response } = error;
 
    const { removeError } = useErrors();
-   const [showMarkdown, setShowMarkdown] = useState(false);
-   const { markdown, setMarkdown } = useMarkdown();
+   const { setDefaultMarkdown, renderedMarkdown } = useMarkdown();
 
    useEffect(() => {
-      setMarkdown({ method: request.method, url: request.url, status: response.status });
+      setDefaultMarkdown({ method: request.method, url: request.url, status: response.status });
    }, [error]);
-
-   if (!error) return <div>No error to display</div>;
 
    return (
       <div className="bg-gray-200 rounded-md px-4 py-2 ">
@@ -31,8 +28,8 @@ export const ErrorPanel = (error: Entry) => {
                <button className="" onClick={() => removeError(error)}>
                   ❌
                </button>
-               <button>✅</button>
-               <button onClick={() => setShowMarkdown((s) => !s)}>🗒️</button>
+               {/* <button>✅</button> */}
+               <button onClick={() => navigator.clipboard.writeText(renderedMarkdown)}>🗒️</button>
             </div>
 
             <div className=" flex-grow flex flex-col ">
@@ -42,7 +39,6 @@ export const ErrorPanel = (error: Entry) => {
                </div>
             </div>
          </div>
-         {showMarkdown && <MarkdownContainer markdown={markdown} />}
       </div>
    );
 };
@@ -50,8 +46,14 @@ export const ErrorPanel = (error: Entry) => {
 const RequestPanel = ({ data }: { data: Request }) => {
    const { headers, method, url } = data;
 
-   const [heads, headsToLog, handleAdd, handleRemove] = useHeaders(headers);
+   const [heads, headsToLog, handleAdd, handleRemove, transformedHeads] = useHeaders(headers);
    const [expanded, setExpanded] = useState(false);
+
+   const { addHeaderToMarkdown } = useMarkdown();
+
+   useEffect(() => {
+      addHeaderToMarkdown(transformedHeads);
+   }, [transformedHeads]);
 
    return (
       <PanelContainer>
@@ -85,9 +87,15 @@ const RequestPanel = ({ data }: { data: Request }) => {
 
 const ResponsePanel = ({ data }: { data: Response }) => {
    const { headers, status } = data;
-   const [heads, headsToLog, handleAdd, handleRemove] = useHeaders(headers);
+   const [heads, headsToLog, handleAdd, handleRemove, transformedHeads] = useHeaders(headers);
 
    const [expanded, setExpanded] = useState(false);
+
+   const { addHeaderToMarkdown } = useMarkdown();
+
+   useEffect(() => {
+      addHeaderToMarkdown(transformedHeads);
+   }, [transformedHeads]);
 
    return (
       <PanelContainer>
@@ -172,9 +180,10 @@ const AddHeadersButton = ({ onClick, expanded }: { onClick: () => void; expanded
    </button>
 );
 
-const MarkdownContainer = ({ markdown }: { markdown: any }) => {
-   const arr = Object.entries(markdown);
-   const md = arr.map((item) => `* *${item[0]}*: \`\`\`${item[1]}\`\`\`  `);
+/* const MarkdownContainer = () => {
+   const { markdown } = useMarkdown();
+
+   const md = renderMarkdown(markdown);
 
    return <div className="font-mono">{md}</div>;
-};
+}; */
