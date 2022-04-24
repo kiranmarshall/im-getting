@@ -1,24 +1,28 @@
-import { BaseSyntheticEvent, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Header } from 'har-format';
 
-export function useHeaders(headers: Header[]): [Header[], Header[], (e: BaseSyntheticEvent) => void, (name: string) => void] {
-   const [heads, setHeads] = useState<string[]>([]);
+export type ObjectRecord = Record<string, any>;
+
+export function useHeaders(headers: Header[]): [Header[], Header[], (header: Header) => void, (header: Header) => void, ObjectRecord[]] {
+   const [headsToLog, setHeadsToLog] = useState<Header[]>([]);
 
    const headerTypes = useMemo(() => [...headers], [headers]);
+   const transformedHeaders = useMemo(() => headsToLog.map(objectTransformer), [headsToLog]);
 
-   const headersToLog = headers.filter(({ name, value }) => heads.includes(name) && { name, value });
-
-   const handleAdd = (e: BaseSyntheticEvent) => {
-      const header = e.target.innerHTML;
-
-      if (heads.includes(header)) return;
-      return setHeads((h) => [...h, header]);
+   const handleAdd = (header: Header) => {
+      if (headsToLog.includes(header)) return;
+      return setHeadsToLog((h) => [...h, header]);
    };
 
-   const handleRemove = (name: string) =>
-      setHeads((headers) => {
-         return headers.filter((header) => header !== name);
+   const handleRemove = (header: Header) =>
+      setHeadsToLog((headers) => {
+         return headers.filter((head) => head !== header);
       });
 
-   return [headerTypes, headersToLog, handleAdd, handleRemove];
+   return [headerTypes, headsToLog, handleAdd, handleRemove, transformedHeaders];
 }
+
+const objectTransformer = (obj: ObjectRecord): ObjectRecord => {
+   const transformedObject = Object.values(obj);
+   return Object.fromEntries([transformedObject]);
+};
