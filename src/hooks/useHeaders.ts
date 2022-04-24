@@ -1,22 +1,23 @@
 import { useMemo, useState } from 'react';
 import { Header } from 'har-format';
 
-export function useHeaders(headers: Header[]): [Header[], Header[], (header: Header) => void, (header: Header) => void] {
-   const [heads, setHeads] = useState<Header[]>([]);
+export type ObjectRecord = Record<string, any>;
+
+export function useHeaders(headers: Header[]): [Header[], Header[], (header: Header) => void, (header: Header) => void, ObjectRecord[]] {
+   const [headsToLog, setHeadsToLog] = useState<Header[]>([]);
 
    const headerTypes = useMemo(() => [...headers], [headers]);
-
-   const headersToLog = headers.filter((head) => heads.includes(head) && head);
+   const transformedHeaders = useMemo(() => headsToLog.map(objectTransformer), [headsToLog]);
 
    const handleAdd = (header: Header) => {
-      if (heads.includes(header)) return;
-      return setHeads((h) => [...h, header]);
+      if (headsToLog.includes(header)) return;
+      return setHeadsToLog((h) => [...h, header]);
    };
 
    const handleRemove = (header: Header) =>
-      setHeads((headers) => {
+      setHeadsToLog((headers) => {
          return headers.filter((head) => head !== header);
       });
 
-   return [headerTypes, headersToLog, handleAdd, handleRemove];
+   return [headerTypes, headsToLog, handleAdd, handleRemove, transformedHeaders];
 }
