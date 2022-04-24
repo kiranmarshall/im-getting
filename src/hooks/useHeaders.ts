@@ -21,3 +21,8 @@ export function useHeaders(headers: Header[]): [Header[], Header[], (header: Hea
 
    return [headerTypes, headsToLog, handleAdd, handleRemove, transformedHeaders];
 }
+
+const objectTransformer = (obj: ObjectRecord): ObjectRecord => {
+   const transformedObject = Object.values(obj);
+   return Object.fromEntries([transformedObject]);
+};
