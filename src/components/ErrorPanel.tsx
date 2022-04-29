@@ -114,12 +114,10 @@ const RequestPanel = ({ data }: { data: Request }) => {
             </PanelList>
          )}
 
-         {postData && (
-            <div className="flex items-start ">
-               <span className=" min-w-fit mr-2">payload: </span>
-               <span className="max-h-8 overflow-hidden">{postData.text}</span>
-            </div>
-         )}
+         <div className="flex items-start ">
+            <span className=" min-w-fit mr-2">payload: </span>
+            <span className="max-h-8 overflow-hidden">{postData?.text ?? 'No Payload'}</span>
+         </div>
       </PanelContainer>
    );
 };
@@ -143,7 +141,7 @@ const ResponsePanel = ({ data }: { data: Response }) => {
             <AddButton expanded={expanded} onClick={() => setExpanded((e) => !e)} type="headers" />
          </div>
 
-         <span>status: {status}</span>
+         {status && <span>status: {status}</span>}
          {headsToLog.map((header, index) => (
             <AddedHeader key={`${header.name}${index}`} name={header.name} value={header.value} onClick={() => handleRemove(header)} />
          ))}
@@ -162,12 +160,10 @@ const ResponsePanel = ({ data }: { data: Response }) => {
             </PanelList>
          )}
 
-         {content && (
-            <div className="flex items-start ">
-               <span className=" min-w-fit mr-2">payload: </span>
-               <span className="max-h-8 overflow-hidden">{content?.text}</span>
-            </div>
-         )}
+         <div className="flex items-start ">
+            <span className=" min-w-fit mr-2">payload: </span>
+            <span className="max-h-8 overflow-hidden">{content.text ?? 'No Payload'}</span>
+         </div>
       </PanelContainer>
    );
 };
@@ -191,21 +187,21 @@ const PanelContainer: FC = (props) => <div className="flex flex-col space-y-2 p-
 const PanelHead: FC = (props) => <h1 className=" font-sans font-semibold text-xl" {...props} />;
 const PanelList: FC = (props) => <ul className="flex flex-wrap bg-gray-50 p-1 rounded-md" {...props} />;
 
-const Method = ({ method }: { method: string }) => {
+const methodBgColorResolver = (type: string) => {
    const { DELETE, GET, OPTIONS, POST, PUT } = HTTPMethods;
 
-   const bgColorResolver = (type: string) => {
-      if (type === DELETE) return 'bg-red-200';
-      if (type === GET) return 'bg-blue-200';
-      if (type === OPTIONS) return 'bg-yellow-200';
-      if (type === POST) return 'bg-purple-200';
-      if (type === PUT) return 'bg-orange-200';
-   };
+   if (type === DELETE) return 'bg-red-200';
+   if (type === GET) return 'bg-blue-200';
+   if (type === OPTIONS) return 'bg-yellow-200';
+   if (type === POST) return 'bg-purple-200';
+   if (type === PUT) return 'bg-orange-200';
+};
 
+const Method = ({ method }: { method: string }) => {
    return (
-      <div className="whitespace-nowrap">
-         <span className={`mr-2`}>method:</span>
-         <span className={`px-1 py-1 rounded-sm ${bgColorResolver(method)}`}>{method}</span>
+      <div className="flex items-center">
+         <span className="mr-2">method:</span>
+         <span className={`px-1 py-1 rounded-sm ${methodBgColorResolver(method)}`}>{method}</span>
       </div>
    );
 };
