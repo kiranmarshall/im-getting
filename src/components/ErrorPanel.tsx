@@ -17,8 +17,10 @@ export const ErrorPanel = (error: Entry) => {
    const { removeError } = useErrors();
    const { setDefaultMarkdown, renderedMarkdown } = useMarkdown();
 
+   const requestPayload = request.postData ? { reqPayload: request.postData.text } : {};
+
    useEffect(() => {
-      setDefaultMarkdown({ method: request.method, url: request.url, status: response.status });
+      setDefaultMarkdown({ method: request.method, url: request.url, status: response.status, ...requestPayload });
    }, [error]);
 
    return (
@@ -28,7 +30,6 @@ export const ErrorPanel = (error: Entry) => {
                <button className="" onClick={() => removeError(error)}>
                   ❌
                </button>
-               {/* <button>✅</button> */}
                <button onClick={() => navigator.clipboard.writeText(renderedMarkdown)}>🗒️</button>
             </div>
 
@@ -44,22 +45,26 @@ export const ErrorPanel = (error: Entry) => {
 };
 
 const RequestPanel = ({ data }: { data: Request }) => {
-   const { headers, method, url } = data;
+   const { headers, method, url, postData, cookies: cooks } = data;
 
    const [heads, headsToLog, handleAdd, handleRemove, transformedHeads] = useHeaders(headers);
+   const [cookies, cookiesToLog, handleAddCookies, handleRemoveCookies, transformedCookies] = useHeaders(cooks);
+
    const [expanded, setExpanded] = useState(false);
+   const [cookiesExpanded, setCookiesExpanded] = useState(false);
 
    const { addHeaderToMarkdown } = useMarkdown();
 
    useEffect(() => {
-      addHeaderToMarkdown(transformedHeads);
-   }, [transformedHeads]);
+      addHeaderToMarkdown([transformedHeads, transformedCookies]);
+   }, [transformedHeads, transformedCookies]);
 
    return (
       <PanelContainer>
          <div className="w-full flex items-center">
             <PanelHead>Request</PanelHead>
-            <AddHeadersButton expanded={expanded} onClick={() => setExpanded((e) => !e)} />
+            <AddButton expanded={expanded} onClick={() => setExpanded((e) => !e)} type="headers" />
+            <AddButton expanded={cookiesExpanded} onClick={() => setCookiesExpanded((e) => !e)} type="cookies" />
          </div>
 
          <Method method={method} />
@@ -67,6 +72,33 @@ const RequestPanel = ({ data }: { data: Request }) => {
          {headsToLog.map((header, index) => (
             <AddedHeader key={`${header.name}${index}`} name={header.name} value={header.value} onClick={() => handleRemove(header)} />
          ))}
+         {cookiesToLog.map((header, index) => (
+            <AddedHeader
+               key={`${header.name}${index}`}
+               name={header.name}
+               value={header.value}
+               onClick={() => handleRemoveCookies(header)}
+            />
+         ))}
+
+         {cookiesExpanded && (
+            <PanelList>
+               {cookies.map((header, index) => {
+                  const exists = cookiesToLog.includes(header);
+
+                  return (
+                     !exists && (
+                        <HeaderToAdd
+                           picked={false}
+                           key={`${header.name}${index}`}
+                           header={header.name}
+                           onClick={() => handleAddCookies(header)}
+                        />
+                     )
+                  );
+               })}
+            </PanelList>
+         )}
 
          {expanded && (
             <PanelList>
@@ -81,12 +113,19 @@ const RequestPanel = ({ data }: { data: Request }) => {
                })}
             </PanelList>
          )}
+
+         {postData && (
+            <div className="flex items-start ">
+               <span className=" min-w-fit mr-2">payload: </span>
+               <span className="max-h-8 overflow-hidden">{postData.text}</span>
+            </div>
+         )}
       </PanelContainer>
    );
 };
 
 const ResponsePanel = ({ data }: { data: Response }) => {
-   const { headers, status } = data;
+   const { headers, status, content } = data;
    const [heads, headsToLog, handleAdd, handleRemove, transformedHeads] = useHeaders(headers);
 
    const [expanded, setExpanded] = useState(false);
@@ -94,14 +133,14 @@ const ResponsePanel = ({ data }: { data: Response }) => {
    const { addHeaderToMarkdown } = useMarkdown();
 
    useEffect(() => {
-      addHeaderToMarkdown(transformedHeads);
+      addHeaderToMarkdown([transformedHeads]);
    }, [transformedHeads]);
 
    return (
       <PanelContainer>
          <div className="w-full flex items-center">
             <PanelHead>Response</PanelHead>
-            <AddHeadersButton expanded={expanded} onClick={() => setExpanded((e) => !e)} />
+            <AddButton expanded={expanded} onClick={() => setExpanded((e) => !e)} type="headers" />
          </div>
 
          <span>status: {status}</span>
@@ -121,6 +160,13 @@ const ResponsePanel = ({ data }: { data: Response }) => {
                   );
                })}
             </PanelList>
+         )}
+
+         {content && (
+            <div className="flex items-start ">
+               <span className=" min-w-fit mr-2">payload: </span>
+               <span className="max-h-8 overflow-hidden">{content?.text}</span>
+            </div>
          )}
       </PanelContainer>
    );
@@ -171,19 +217,19 @@ const Url = ({ url }: { url: string }) => (
    </div>
 );
 
-const AddHeadersButton = ({ onClick, expanded }: { onClick: () => void; expanded: boolean }) => (
+interface AddButtonProps {
+   onClick: () => void;
+   expanded: boolean;
+   type: string;
+}
+
+const AddButton: FC<AddButtonProps> = ({ onClick, expanded, type }) => (
    <button
-      className={`ml-auto font-sans rounded-md text-xs px-2 py-1 transition-colors ${expanded ? 'bg-green-100' : 'bg-green-200'}`}
+      className={`ml-auto font-sans rounded-md text-xs px-2 py-1 transition-colors capitalize ${
+         expanded ? 'bg-green-100' : 'bg-green-200'
+      }`}
       onClick={onClick}
    >
-      Add headers
+      {`All ${type}`}
    </button>
 );
-
-/* const MarkdownContainer = () => {
-   const { markdown } = useMarkdown();
-
-   const md = renderMarkdown(markdown);
-
-   return <div className="font-mono">{md}</div>;
-}; */
