@@ -124,10 +124,13 @@ const RequestPanel = ({ data }: { data: Request }) => {
 };
 
 const ResponsePanel = ({ data }: { data: Response }) => {
-   const { headers, status, content } = data;
+   const { headers, status, content, cookies: cooks } = data;
+
    const [heads, headsToLog, handleAdd, handleRemove, transformedHeads] = useHeaders(headers);
+   const [cookies, cookiesToLog, handleAddCookies, handleRemoveCookies, transformedCookies] = useHeaders(cooks);
 
    const [expanded, setExpanded] = useState(false);
+   const [cookiesExpanded, setCookiesExpanded] = useState(false);
 
    const { addHeaderToMarkdown } = useMarkdown();
 
