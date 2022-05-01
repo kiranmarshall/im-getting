@@ -18,9 +18,10 @@ export const ErrorPanel = (error: Entry) => {
    const { setDefaultMarkdown, renderedMarkdown } = useMarkdown();
 
    const requestPayload = request.postData ? { reqPayload: request.postData.text } : {};
+   const responsePayload = response.content.text ? { resPayload: response.content.text } : {};
 
    useEffect(() => {
-      setDefaultMarkdown({ method: request.method, url: request.url, status: response.status, ...requestPayload });
+      setDefaultMarkdown({ method: request.method, url: request.url, status: response.status, ...requestPayload, ...responsePayload });
    }, [error]);
 
    return (
