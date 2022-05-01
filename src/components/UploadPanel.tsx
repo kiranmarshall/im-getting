@@ -3,6 +3,14 @@ import { useEffect, useRef, useState } from 'react';
 import { useErrors } from '@/contexts';
 import './UploadPanel.css';
 
+export const errorTypes = {
+   information: /^1[\d+]/,
+   success: /^2[\d+]/,
+   redirect: /^3[\d+]/,
+   user: /^4[\d+]/,
+   server: /^5[\d+]/,
+};
+
 export const UploadPanel = () => {
    const uploadRef = useRef<HTMLInputElement | null>(null);
    const pasteRef = useRef<HTMLTextAreaElement | null>(null);
@@ -30,9 +38,7 @@ export const UploadPanel = () => {
    };
 
    const errorFilter = (entries: Entry[]) => {
-      const success = /^2[\d+]/;
-      const redirect = /^3[\d+]/;
-      const information = /^1[\d+]/;
+      const { success, redirect, information } = errorTypes;
 
       return entries.filter(({ response }) => {
          if (response.status.toString() === '0') return;
