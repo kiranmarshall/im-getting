@@ -7,7 +7,7 @@ export const UploadPanel = () => {
    const uploadRef = useRef<HTMLInputElement | null>(null);
    const pasteRef = useRef<HTMLTextAreaElement | null>(null);
 
-   const [showUploader, setShowUploader] = useState(false);
+   const [isFirstUpload, setIsFirstUpload] = useState(true);
 
    const [har, setHar] = useState<Har | undefined>(undefined);
    const { setErrors } = useErrors();
@@ -47,21 +47,19 @@ export const UploadPanel = () => {
       if (!har) return;
       const errors = errorFilter(har.log.entries);
 
+      setIsFirstUpload(false);
       if (!errors.length) return alert('no errors found in HAR file');
-      setShowUploader(false);
       setErrors(errors);
    }, [har]);
 
-   console.log(showUploader);
-
    return (
       <div className="flex-grow">
-         {/* {har && <button onClick={() => setShowUploader((s) => !s)}>Show Uploader</button>} */}
-
          <div className="grid grid-cols-2 h-40">
             <label className="flex flex-col items-center justify-center group cursor-pointer">
-               <div className="text-7xl group-hover:scale-105 transition-transform">⬆️</div>
-               <span className="font-semobild tracking-tight mt-4">Click to upload</span>
+               <div className="text-7xl h-20 w-20 group-hover:scale-105 transition-transform">⬆️</div>
+               <span className="flex-grow text-xl font-semibold tracking-tight mt-4">
+                  {isFirstUpload ? 'Click to upload' : 'Clear HAR and upload'}
+               </span>
                <input className="place-self-center" ref={uploadRef} type="file" onChange={handleHarUpload} />
             </label>
 
@@ -69,7 +67,7 @@ export const UploadPanel = () => {
                <div className="bg-white rounded-full h-20 w-20 flex  items-center justify-center overflow-hidden cursor-text group-hover:scale-105 transition-transform">
                   <textarea className="custom-text-area" ref={pasteRef} onChange={handleHarPaste} />
                </div>
-               <span className="font-semobild tracking-tight mt-4">Paste HAR here</span>
+               <span className="flex-grow  text-xl font-semibold tracking-tight mt-4">Paste HAR here</span>
             </label>
          </div>
       </div>
