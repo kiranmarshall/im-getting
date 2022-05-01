@@ -1,0 +1,8 @@
+input[type='file'] {
+   display: none;
+}
+
+.custom-text-area {
+   @apply focus:outline-none outline-none text-center h-6 caret-transparent;
+   resize: none;
+}
