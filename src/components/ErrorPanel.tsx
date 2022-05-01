@@ -18,9 +18,10 @@ export const ErrorPanel = (error: Entry) => {
    const { setDefaultMarkdown, renderedMarkdown } = useMarkdown();
 
    const requestPayload = request.postData ? { reqPayload: request.postData.text } : {};
+   const responsePayload = response.content.text ? { resPayload: response.content.text } : {};
 
    useEffect(() => {
-      setDefaultMarkdown({ method: request.method, url: request.url, status: response.status, ...requestPayload });
+      setDefaultMarkdown({ method: request.method, url: request.url, status: response.status, ...requestPayload, ...responsePayload });
    }, [error]);
 
    return (
@@ -63,15 +64,39 @@ const RequestPanel = ({ data }: { data: Request }) => {
       <PanelContainer>
          <div className="w-full flex items-center">
             <PanelHead>Request</PanelHead>
-            <AddButton expanded={expanded} onClick={() => setExpanded((e) => !e)} type="headers" />
-            <AddButton expanded={cookiesExpanded} onClick={() => setCookiesExpanded((e) => !e)} type="cookies" />
+
+            <div className="ml-auto felx items-center space-x-4">
+               <AddButton expanded={expanded} onClick={() => setExpanded((e) => !e)} type="headers" />
+               <AddButton expanded={cookiesExpanded} onClick={() => setCookiesExpanded((e) => !e)} type="cookies" />
+            </div>
          </div>
 
          <Method method={method} />
          <Url url={url} />
+
+         <div className="flex items-start ">
+            <span className=" min-w-fit mr-2">payload: </span>
+            <span className="max-h-8 overflow-hidden">{postData?.text ?? 'No Payload'}</span>
+         </div>
+
          {headsToLog.map((header, index) => (
             <AddedHeader key={`${header.name}${index}`} name={header.name} value={header.value} onClick={() => handleRemove(header)} />
          ))}
+
+         {expanded && (
+            <PanelList>
+               {heads.map((header, index) => {
+                  const exists = headsToLog.includes(header);
+
+                  return (
+                     !exists && (
+                        <HeaderToAdd picked={false} key={`${header.name}${index}`} header={header.name} onClick={() => handleAdd(header)} />
+                     )
+                  );
+               })}
+            </PanelList>
+         )}
+
          {cookiesToLog.map((header, index) => (
             <AddedHeader
                key={`${header.name}${index}`}
@@ -99,36 +124,18 @@ const RequestPanel = ({ data }: { data: Request }) => {
                })}
             </PanelList>
          )}
-
-         {expanded && (
-            <PanelList>
-               {heads.map((header, index) => {
-                  const exists = headsToLog.includes(header);
-
-                  return (
-                     !exists && (
-                        <HeaderToAdd picked={false} key={`${header.name}${index}`} header={header.name} onClick={() => handleAdd(header)} />
-                     )
-                  );
-               })}
-            </PanelList>
-         )}
-
-         {postData && (
-            <div className="flex items-start ">
-               <span className=" min-w-fit mr-2">payload: </span>
-               <span className="max-h-8 overflow-hidden">{postData.text}</span>
-            </div>
-         )}
       </PanelContainer>
    );
 };
 
 const ResponsePanel = ({ data }: { data: Response }) => {
-   const { headers, status, content } = data;
+   const { headers, status, content, cookies: cooks } = data;
+
    const [heads, headsToLog, handleAdd, handleRemove, transformedHeads] = useHeaders(headers);
+   const [cookies, cookiesToLog, handleAddCookies, handleRemoveCookies, transformedCookies] = useHeaders(cooks);
 
    const [expanded, setExpanded] = useState(false);
+   const [cookiesExpanded, setCookiesExpanded] = useState(false);
 
    const { addHeaderToMarkdown } = useMarkdown();
 
@@ -140,10 +147,20 @@ const ResponsePanel = ({ data }: { data: Response }) => {
       <PanelContainer>
          <div className="w-full flex items-center">
             <PanelHead>Response</PanelHead>
-            <AddButton expanded={expanded} onClick={() => setExpanded((e) => !e)} type="headers" />
+
+            <div className="ml-auto felx items-center space-x-4">
+               <AddButton expanded={expanded} onClick={() => setExpanded((e) => !e)} type="headers" />
+               <AddButton expanded={cookiesExpanded} onClick={() => setCookiesExpanded((e) => !e)} type="cookies" />
+            </div>
          </div>
 
-         <span>status: {status}</span>
+         {status && <span>status: {status}</span>}
+
+         <div className="flex items-start ">
+            <span className=" min-w-fit mr-2">payload: </span>
+            <span className="max-h-8 overflow-hidden">{content.text ?? 'No Payload'}</span>
+         </div>
+
          {headsToLog.map((header, index) => (
             <AddedHeader key={`${header.name}${index}`} name={header.name} value={header.value} onClick={() => handleRemove(header)} />
          ))}
@@ -162,11 +179,32 @@ const ResponsePanel = ({ data }: { data: Response }) => {
             </PanelList>
          )}
 
-         {content && (
-            <div className="flex items-start ">
-               <span className=" min-w-fit mr-2">payload: </span>
-               <span className="max-h-8 overflow-hidden">{content?.text}</span>
-            </div>
+         {cookiesToLog.map((header, index) => (
+            <AddedHeader
+               key={`${header.name}${index}`}
+               name={header.name}
+               value={header.value}
+               onClick={() => handleRemoveCookies(header)}
+            />
+         ))}
+
+         {cookiesExpanded && (
+            <PanelList>
+               {cookies.map((header, index) => {
+                  const exists = cookiesToLog.includes(header);
+
+                  return (
+                     !exists && (
+                        <HeaderToAdd
+                           picked={false}
+                           key={`${header.name}${index}`}
+                           header={header.name}
+                           onClick={() => handleAddCookies(header)}
+                        />
+                     )
+                  );
+               })}
+            </PanelList>
          )}
       </PanelContainer>
    );
@@ -191,21 +229,21 @@ const PanelContainer: FC = (props) => <div className="flex flex-col space-y-2 p-
 const PanelHead: FC = (props) => <h1 className=" font-sans font-semibold text-xl" {...props} />;
 const PanelList: FC = (props) => <ul className="flex flex-wrap bg-gray-50 p-1 rounded-md" {...props} />;
 
-const Method = ({ method }: { method: string }) => {
+const methodBgColorResolver = (type: string) => {
    const { DELETE, GET, OPTIONS, POST, PUT } = HTTPMethods;
 
-   const bgColorResolver = (type: string) => {
-      if (type === DELETE) return 'bg-red-200';
-      if (type === GET) return 'bg-blue-200';
-      if (type === OPTIONS) return 'bg-yellow-200';
-      if (type === POST) return 'bg-purple-200';
-      if (type === PUT) return 'bg-orange-200';
-   };
+   if (type === DELETE) return 'bg-red-200';
+   if (type === GET) return 'bg-blue-200';
+   if (type === OPTIONS) return 'bg-yellow-200';
+   if (type === POST) return 'bg-purple-200';
+   if (type === PUT) return 'bg-orange-200';
+};
 
+const Method = ({ method }: { method: string }) => {
    return (
-      <div className="whitespace-nowrap">
-         <span className={`mr-2`}>method:</span>
-         <span className={`px-1 py-1 rounded-sm ${bgColorResolver(method)}`}>{method}</span>
+      <div className="flex items-center">
+         <span className="mr-2">method:</span>
+         <span className={`px-1 py-1 rounded-sm ${methodBgColorResolver(method)}`}>{method}</span>
       </div>
    );
 };
@@ -225,9 +263,7 @@ interface AddButtonProps {
 
 const AddButton: FC<AddButtonProps> = ({ onClick, expanded, type }) => (
    <button
-      className={`ml-auto font-sans rounded-md text-xs px-2 py-1 transition-colors capitalize ${
-         expanded ? 'bg-green-100' : 'bg-green-200'
-      }`}
+      className={`font-sans rounded-md text-xs px-2 py-1 transition-colors capitalize ${expanded ? 'bg-green-100' : 'bg-green-200'}`}
       onClick={onClick}
    >
       {`All ${type}`}

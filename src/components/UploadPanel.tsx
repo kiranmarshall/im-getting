@@ -30,10 +30,15 @@ export const UploadPanel = () => {
 
    const errorFilter = (entries: Entry[]) => {
       const success = /^2[\d+]/;
+      const redirect = /^3[\d+]/;
+      const information = /^1[\d+]/;
 
       return entries.filter(({ response }) => {
          if (response.status.toString() === '0') return;
-         return !success.test(response.status.toString());
+         if (success.test(response.status.toString())) return;
+         if (redirect.test(response.status.toString())) return;
+         if (information.test(response.status.toString())) return;
+         return response;
       });
    };
 
