@@ -1,7 +1,8 @@
-import { BaseSyntheticEvent, FC, useEffect, useState } from 'react';
+import { BaseSyntheticEvent, FC, HTMLAttributes, useEffect, useState } from 'react';
 import { Entry, Request, Response } from 'har-format';
 import { useHeaders } from '@/hooks';
 import { useErrors, useMarkdown } from '@/contexts';
+import { head } from 'lodash';
 
 enum HTTPMethods {
    GET = 'GET',
@@ -66,8 +67,13 @@ const RequestPanel = ({ data }: { data: Request }) => {
             <PanelHead>Request</PanelHead>
 
             <div className="ml-auto felx items-center space-x-4">
-               <AddButton expanded={expanded} onClick={() => setExpanded((e) => !e)} type="headers" />
-               <AddButton expanded={cookiesExpanded} onClick={() => setCookiesExpanded((e) => !e)} type="cookies" />
+               <AddButton expanded={expanded} onClick={() => setExpanded((e) => !e)} type="headers" disabled={!heads.length} />
+               <AddButton
+                  expanded={cookiesExpanded}
+                  onClick={() => setCookiesExpanded((e) => !e)}
+                  type="cookies"
+                  disabled={!cookies.length}
+               />
             </div>
          </div>
 
@@ -149,8 +155,13 @@ const ResponsePanel = ({ data }: { data: Response }) => {
             <PanelHead>Response</PanelHead>
 
             <div className="ml-auto felx items-center space-x-4">
-               <AddButton expanded={expanded} onClick={() => setExpanded((e) => !e)} type="headers" />
-               <AddButton expanded={cookiesExpanded} onClick={() => setCookiesExpanded((e) => !e)} type="cookies" />
+               <AddButton expanded={expanded} onClick={() => setExpanded((e) => !e)} type="headers" disabled={!heads.length} />
+               <AddButton
+                  expanded={cookiesExpanded}
+                  onClick={() => setCookiesExpanded((e) => !e)}
+                  type="cookies"
+                  disabled={!cookies.length}
+               />
             </div>
          </div>
 
@@ -255,17 +266,19 @@ const Url = ({ url }: { url: string }) => (
    </div>
 );
 
-interface AddButtonProps {
+interface AddButtonProps extends HTMLAttributes<HTMLButtonElement> {
    onClick: () => void;
    expanded: boolean;
-   type: string;
+   type: 'headers' | 'cookies';
+   disabled: boolean;
 }
 
-const AddButton: FC<AddButtonProps> = ({ onClick, expanded, type }) => (
-   <button
-      className={`font-sans rounded-md text-xs px-2 py-1 transition-colors capitalize ${expanded ? 'bg-green-100' : 'bg-green-200'}`}
-      onClick={onClick}
-   >
-      {`All ${type}`}
-   </button>
-);
+const AddButton: FC<AddButtonProps> = ({ onClick, expanded, type, disabled }) => {
+   const baseClass = 'font-sans rounded-md text-xs px-2 py-1 transition-colors capitalize disabled:bg-red-50';
+
+   return (
+      <button onClick={onClick} disabled={disabled} className={`${baseClass} ${expanded ? 'bg-green-100' : 'bg-green-200'} `}>
+         {`${disabled ? 'No' : 'All'} ${type}`}
+      </button>
+   );
+};
