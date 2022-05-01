@@ -2,11 +2,10 @@ import { BaseSyntheticEvent, FC, HTMLAttributes, useEffect, useState } from 'rea
 import { Entry, Request, Response } from 'har-format';
 import { useHeaders } from '@/hooks';
 import { useErrors, useMarkdown } from '@/contexts';
-import { head } from 'lodash';
 
 enum HTTPMethods {
    GET = 'GET',
-   DELETE = 'DELETE',
+   DELETE = 'DELETE',   
    OPTIONS = 'OPTIONS',
    POST = 'POST',
    PUT = 'PUT',

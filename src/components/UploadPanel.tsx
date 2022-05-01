@@ -1,6 +1,7 @@
-import { useErrors } from '@/contexts';
 import { Entry, Har } from 'har-format';
 import { useEffect, useRef, useState } from 'react';
+import { useErrors } from '@/contexts';
+import './UploadPanel.css';
 
 export const UploadPanel = () => {
    const uploadRef = useRef<HTMLInputElement | null>(null);
@@ -51,17 +52,26 @@ export const UploadPanel = () => {
       setErrors(errors);
    }, [har]);
 
-   return (
-      <div>
-         {har && <button onClick={() => setShowUploader((s) => !s)}>Show Uploader</button>}
+   console.log(showUploader);
 
-         {showUploader ||
-            (!har && (
-               <div className="grid grid-cols-[1fr_2fr] h-40">
-                  <input className="place-self-center" ref={uploadRef} type="file" onChange={handleHarUpload} />
-                  <textarea placeholder="paste har here" className="p-2" ref={pasteRef} onChange={handleHarPaste} />
+   return (
+      <div className="flex-grow">
+         {/* {har && <button onClick={() => setShowUploader((s) => !s)}>Show Uploader</button>} */}
+
+         <div className="grid grid-cols-2 h-40">
+            <label className="flex flex-col items-center justify-center group cursor-pointer">
+               <div className="text-7xl group-hover:scale-105 transition-transform">⬆️</div>
+               <span className="font-semobild tracking-tight mt-4">Click to upload</span>
+               <input className="place-self-center" ref={uploadRef} type="file" onChange={handleHarUpload} />
+            </label>
+
+            <label className="flex flex-col items-center justify-center group ">
+               <div className="bg-white rounded-full h-20 w-20 flex  items-center justify-center overflow-hidden cursor-text group-hover:scale-105 transition-transform">
+                  <textarea className="custom-text-area" ref={pasteRef} onChange={handleHarPaste} />
                </div>
-            ))}
+               <span className="font-semobild tracking-tight mt-4">Paste HAR here</span>
+            </label>
+         </div>
       </div>
    );
 };
