@@ -2,10 +2,11 @@ import { BaseSyntheticEvent, FC, HTMLAttributes, useEffect, useState } from 'rea
 import { Entry, Request, Response } from 'har-format';
 import { useHeaders } from '@/hooks';
 import { useErrors, useMarkdown } from '@/contexts';
+import { errorTypes } from './UploadPanel';
 
 enum HTTPMethods {
    GET = 'GET',
-   DELETE = 'DELETE',   
+   DELETE = 'DELETE',
    OPTIONS = 'OPTIONS',
    POST = 'POST',
    PUT = 'PUT',
@@ -164,7 +165,7 @@ const ResponsePanel = ({ data }: { data: Response }) => {
             </div>
          </div>
 
-         {status && <span>status: {status}</span>}
+         {status && <Status status={status.toString()} />}
 
          <div className="flex items-start ">
             <span className=" min-w-fit mr-2">payload: </span>
@@ -247,6 +248,25 @@ const methodBgColorResolver = (type: string) => {
    if (type === OPTIONS) return 'bg-yellow-200';
    if (type === POST) return 'bg-purple-200';
    if (type === PUT) return 'bg-orange-200';
+};
+
+const statusBgColorResolver = (type: string) => {
+   const { success, redirect, information, server, user } = errorTypes;
+
+   if (success.test(type)) return 'bg-green-600';
+   if (redirect.test(type)) return 'bg-pink-600';
+   if (information.test(type)) return 'bg-blue-600';
+   if (server.test(type)) return 'bg-red-600';
+   if (user.test(type)) return 'bg-orange-600';
+};
+
+const Status = ({ status }: { status: string }) => {
+   return (
+      <div className="flex items-center">
+         <span className="mr-2">status:</span>
+         <span className={`px-1 py-1 rounded-sm text-white ${statusBgColorResolver(status)}`}>{status}</span>
+      </div>
+   );
 };
 
 const Method = ({ method }: { method: string }) => {
