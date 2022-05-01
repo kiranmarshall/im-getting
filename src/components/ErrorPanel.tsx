@@ -64,15 +64,39 @@ const RequestPanel = ({ data }: { data: Request }) => {
       <PanelContainer>
          <div className="w-full flex items-center">
             <PanelHead>Request</PanelHead>
-            <AddButton expanded={expanded} onClick={() => setExpanded((e) => !e)} type="headers" />
-            <AddButton expanded={cookiesExpanded} onClick={() => setCookiesExpanded((e) => !e)} type="cookies" />
+
+            <div className="ml-auto felx items-center space-x-4">
+               <AddButton expanded={expanded} onClick={() => setExpanded((e) => !e)} type="headers" />
+               <AddButton expanded={cookiesExpanded} onClick={() => setCookiesExpanded((e) => !e)} type="cookies" />
+            </div>
          </div>
 
          <Method method={method} />
          <Url url={url} />
+
+         <div className="flex items-start ">
+            <span className=" min-w-fit mr-2">payload: </span>
+            <span className="max-h-8 overflow-hidden">{postData?.text ?? 'No Payload'}</span>
+         </div>
+
          {headsToLog.map((header, index) => (
             <AddedHeader key={`${header.name}${index}`} name={header.name} value={header.value} onClick={() => handleRemove(header)} />
          ))}
+
+         {expanded && (
+            <PanelList>
+               {heads.map((header, index) => {
+                  const exists = headsToLog.includes(header);
+
+                  return (
+                     !exists && (
+                        <HeaderToAdd picked={false} key={`${header.name}${index}`} header={header.name} onClick={() => handleAdd(header)} />
+                     )
+                  );
+               })}
+            </PanelList>
+         )}
+
          {cookiesToLog.map((header, index) => (
             <AddedHeader
                key={`${header.name}${index}`}
@@ -100,25 +124,6 @@ const RequestPanel = ({ data }: { data: Request }) => {
                })}
             </PanelList>
          )}
-
-         {expanded && (
-            <PanelList>
-               {heads.map((header, index) => {
-                  const exists = headsToLog.includes(header);
-
-                  return (
-                     !exists && (
-                        <HeaderToAdd picked={false} key={`${header.name}${index}`} header={header.name} onClick={() => handleAdd(header)} />
-                     )
-                  );
-               })}
-            </PanelList>
-         )}
-
-         <div className="flex items-start ">
-            <span className=" min-w-fit mr-2">payload: </span>
-            <span className="max-h-8 overflow-hidden">{postData?.text ?? 'No Payload'}</span>
-         </div>
       </PanelContainer>
    );
 };
@@ -142,10 +147,20 @@ const ResponsePanel = ({ data }: { data: Response }) => {
       <PanelContainer>
          <div className="w-full flex items-center">
             <PanelHead>Response</PanelHead>
-            <AddButton expanded={expanded} onClick={() => setExpanded((e) => !e)} type="headers" />
+
+            <div className="ml-auto felx items-center space-x-4">
+               <AddButton expanded={expanded} onClick={() => setExpanded((e) => !e)} type="headers" />
+               <AddButton expanded={cookiesExpanded} onClick={() => setCookiesExpanded((e) => !e)} type="cookies" />
+            </div>
          </div>
 
          {status && <span>status: {status}</span>}
+
+         <div className="flex items-start ">
+            <span className=" min-w-fit mr-2">payload: </span>
+            <span className="max-h-8 overflow-hidden">{content.text ?? 'No Payload'}</span>
+         </div>
+
          {headsToLog.map((header, index) => (
             <AddedHeader key={`${header.name}${index}`} name={header.name} value={header.value} onClick={() => handleRemove(header)} />
          ))}
@@ -164,10 +179,33 @@ const ResponsePanel = ({ data }: { data: Response }) => {
             </PanelList>
          )}
 
-         <div className="flex items-start ">
-            <span className=" min-w-fit mr-2">payload: </span>
-            <span className="max-h-8 overflow-hidden">{content.text ?? 'No Payload'}</span>
-         </div>
+         {cookiesToLog.map((header, index) => (
+            <AddedHeader
+               key={`${header.name}${index}`}
+               name={header.name}
+               value={header.value}
+               onClick={() => handleRemoveCookies(header)}
+            />
+         ))}
+
+         {cookiesExpanded && (
+            <PanelList>
+               {cookies.map((header, index) => {
+                  const exists = cookiesToLog.includes(header);
+
+                  return (
+                     !exists && (
+                        <HeaderToAdd
+                           picked={false}
+                           key={`${header.name}${index}`}
+                           header={header.name}
+                           onClick={() => handleAddCookies(header)}
+                        />
+                     )
+                  );
+               })}
+            </PanelList>
+         )}
       </PanelContainer>
    );
 };
@@ -225,9 +263,7 @@ interface AddButtonProps {
 
 const AddButton: FC<AddButtonProps> = ({ onClick, expanded, type }) => (
    <button
-      className={`ml-auto font-sans rounded-md text-xs px-2 py-1 transition-colors capitalize ${
-         expanded ? 'bg-green-100' : 'bg-green-200'
-      }`}
+      className={`font-sans rounded-md text-xs px-2 py-1 transition-colors capitalize ${expanded ? 'bg-green-100' : 'bg-green-200'}`}
       onClick={onClick}
    >
       {`All ${type}`}
