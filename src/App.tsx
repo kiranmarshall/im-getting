@@ -7,7 +7,7 @@ const App = () => {
 
    return (
       <div className="flex flex-col space-y-4 p-10">
-         <div className="flex items-center flex-wrap w-3/4">
+         <div className="flex items-center flex-wrap lg:w-[1000px]">
             <h1 className=" place-self-center text-7xl font-extrabold tracking-tighter text-red-500">I'm getting...</h1>
             <UploadPanel />
          </div>
