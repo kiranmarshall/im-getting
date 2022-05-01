@@ -3,6 +3,6 @@ input[type='file'] {
 }
 
 .custom-text-area {
-   @apply focus:outline-none outline-none text-center h-6 caret-transparent;
+   @apply focus:outline-none outline-none text-center h-6;
    resize: none;
 }

@@ -53,11 +53,11 @@ export const UploadPanel = () => {
    }, [har]);
 
    return (
-      <div className="flex-grow">
+      <div className="ml-8 flex-grow my-auto">
          <div className="grid grid-cols-2 h-40">
             <label className="flex flex-col items-center justify-center group cursor-pointer">
-               <div className="text-7xl h-20 w-20 group-hover:scale-105 transition-transform">⬆️</div>
-               <span className="flex-grow text-xl font-semibold tracking-tight mt-4">
+               <div className="text-7xl h-20 w-20 group-hover:scale-105 transition-transform">{isFirstUpload ? '⬆️' : '🔁'}</div>
+               <span className="text-xl font-medium tracking-tighter mt-4">
                   {isFirstUpload ? 'Click to upload' : 'Clear HAR and upload'}
                </span>
                <input className="place-self-center" ref={uploadRef} type="file" onChange={handleHarUpload} />
@@ -67,7 +67,7 @@ export const UploadPanel = () => {
                <div className="bg-white rounded-full h-20 w-20 flex  items-center justify-center overflow-hidden cursor-text group-hover:scale-105 transition-transform">
                   <textarea className="custom-text-area" ref={pasteRef} onChange={handleHarPaste} />
                </div>
-               <span className="flex-grow  text-xl font-semibold tracking-tight mt-4">Paste HAR here</span>
+               <span className=" text-xl font-medium tracking-tighter mt-4">Paste HAR here</span>
             </label>
          </div>
       </div>
