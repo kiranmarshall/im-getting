@@ -11,7 +11,7 @@ export const errorTypes = {
    server: /^5[\d+]/,
 };
 
-export const UploadPanel = () => {
+export const UploadPanel = ({ codes }: { codes: RegExp[] }) => {
    const uploadRef = useRef<HTMLInputElement | null>(null);
    const pasteRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -38,14 +38,13 @@ export const UploadPanel = () => {
    };
 
    const errorFilter = (entries: Entry[]) => {
-      const { success, redirect, information } = errorTypes;
-
       return entries.filter(({ response }) => {
          if (response.status.toString() === '0') return;
-         if (success.test(response.status.toString())) return;
-         if (redirect.test(response.status.toString())) return;
-         if (information.test(response.status.toString())) return;
-         return response;
+
+         for (const code of codes) {
+            if (code.test(`${response.status}`)) return response;
+         }
+         return;
       });
    };
 
@@ -56,7 +55,7 @@ export const UploadPanel = () => {
       setIsFirstUpload(false);
       if (!errors.length) return alert('no errors found in HAR file');
       setErrors(errors);
-   }, [har]);
+   }, [har, codes]);
 
    return (
       <div className="ml-8 flex-grow my-auto">
