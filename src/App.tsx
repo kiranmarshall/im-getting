@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { ErrorPanel, errorTypes, UploadPanel } from './components';
 import { MarkdownProvider, useErrors } from './contexts';
 import './index.css';
 import { uniqueId } from 'lodash';
+import { PaginationBar, usePagination } from './hooks/usePagination';
 
 const codesMap = Object.entries(errorTypes).map((error) => ({ name: error[0], value: error[1] }));
 const defaultCodes = [codesMap[3].value, codesMap[4].value];
@@ -11,16 +12,17 @@ const App = () => {
    const { errors } = useErrors();
    const [codes, setCodes] = useState<RegExp[]>(defaultCodes);
 
+   const { currentSlice, pagesToShow, handlePaginationClick } = usePagination(errors);
+
    const bigRedClass = 'place-self-center text-7xl font-extrabold tracking-tighter text-red-500';
 
    const handleCodeClick = (regex: RegExp) => {
-      if (codes.includes(regex)) return setCodes(codes.filter((code) => code !== regex));
-
       if (regex === codesMap[1].value || regex === codesMap[2].value) {
          const confirmation = confirm('This may produce a lot of additional entries and take a while to render');
          if (!confirmation) return;
       }
 
+      if (codes.includes(regex)) return setCodes(codes.filter((code) => code !== regex));
       setCodes((prevcodes) => [...prevcodes, regex]);
    };
 
@@ -49,9 +51,12 @@ const App = () => {
             <UploadPanel codes={codes} />
          </div>
 
-         {!!errors.length && <span className={`${bigRedClass} text-gray-600 text-4xl`}>Total: {errors.length}</span>}
+         <div className="flex items-center">
+            {!!errors.length && <span className={`${bigRedClass} text-gray-600 text-4xl`}>Total: {errors.length}</span>}
+            <PaginationBar pagesToShow={pagesToShow} handlePaginationClick={handlePaginationClick} className="ml-auto" />
+         </div>
 
-         {errors.map((error) => (
+         {currentSlice.map((error) => (
             <MarkdownProvider key={uniqueId()}>
                <ErrorPanel {...error} />
             </MarkdownProvider>
