@@ -9,7 +9,7 @@ type PaginationItem = number | string;
 const calculatePaginationBar = (totalPages: number, currentIndex: number): PaginationItem[] => {
    if (!totalPages) return [];
    if (totalPages === 1) return [totalPages];
-   return [0, '<', currentIndex / 10, '>', totalPages];
+   return [0, '<', Math.floor(currentIndex / 10), '>', totalPages];
 };
 
 /* Hook */
@@ -32,7 +32,7 @@ export const usePagination = <T,>(arr: T[], desiredElements = 10) => {
       else setIndex(item);
    };
 
-   return { currentSlice, pagesToShow, handlePaginationClick };
+   return { currentSlice, pagesToShow, handlePaginationClick, index: index / 10 };
 };
 
 type Pagination = ReturnType<typeof usePagination>;
