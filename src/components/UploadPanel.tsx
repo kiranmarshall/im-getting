@@ -3,14 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useErrors } from '@/contexts';
 import './UploadPanel.css';
 
-export const errorTypes = {
-   information: /^1[\d+]/,
-   success: /^2[\d+]/,
-   redirect: /^3[\d+]/,
-   user: /^4[\d+]/,
-   server: /^5[\d+]/,
-};
-
 export const UploadPanel = ({ codes }: { codes: RegExp[] }) => {
    const uploadRef = useRef<HTMLInputElement | null>(null);
    const pasteRef = useRef<HTMLTextAreaElement | null>(null);

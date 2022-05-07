@@ -1,8 +1,7 @@
 import { BaseSyntheticEvent, FC, HTMLAttributes, useEffect, useState } from 'react';
 import { Entry, Request, Response } from 'har-format';
-import { useHeaders } from '@/hooks';
+import { errorTypes, useHeaders } from '@/hooks';
 import { useErrors, useMarkdown } from '@/contexts';
-import { errorTypes } from './UploadPanel';
 
 enum HTTPMethods {
    GET = 'GET',
