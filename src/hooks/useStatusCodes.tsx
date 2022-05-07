@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+/* Types */
+
 export const errorTypes = {
    information: /^1[\d+]/,
    success: /^2[\d+]/,
@@ -10,11 +12,15 @@ export const errorTypes = {
 
 type ErrorCode = { name: string; value: RegExp };
 
+/* Utility functions */
+
 export const codesMap: ErrorCode[] = Object.entries(errorTypes).map((error) => ({ name: error[0], value: error[1] }));
 export const defaultCodes = [codesMap[3].value, codesMap[4].value];
 
-export const useStatusCodes = (defaultCodes: RegExp[]) => {
-   const [codes, setCodes] = useState<RegExp[]>(defaultCodes);
+/* Hook */
+
+export const useStatusCodes = (statusCodes?: RegExp[]) => {
+   const [codes, setCodes] = useState<RegExp[]>(statusCodes || defaultCodes);
 
    const handleCodeClick = (regex: RegExp) => {
       if (codes.includes(regex)) return setCodes(codes.filter((code) => code !== regex));
@@ -32,6 +38,8 @@ export const useStatusCodes = (defaultCodes: RegExp[]) => {
 
 type StatusCodes = ReturnType<typeof useStatusCodes>;
 
+/* Component */
+
 interface StatusCodesBarProps extends StatusCodes {
    className?: string;
 }
@@ -45,7 +53,7 @@ export const StatusCodesBar = ({ className = '', codes, handleCodeClick }: Statu
             return (
                <button
                   key={name}
-                  className={`text-gray-400 text-lg px-2 py-1 ${selected ? 'bg-gray-300  rounded-md !text-gray-600' : ''}`}
+                  className={`text-gray-400 text-lg px-2 py-1 rounded-md ${selected ? 'bg-gray-300 !text-gray-600 ' : 'hover:bg-gray-200'}`}
                   onClick={() => handleCodeClick(value)}
                >
                   {`${index + 1}xx`}
