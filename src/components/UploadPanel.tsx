@@ -21,12 +21,17 @@ export const UploadPanel = ({ codes }: { codes: RegExp[] }) => {
    const { setErrors } = useErrors();
 
    const handleHarUpload = async () => {
-      setHar(undefined);
-      const har = uploadRef.current?.files?.[0] || undefined;
-      if (!har) return alert('no file selected');
+      const uploaded = uploadRef.current?.files?.[0] || undefined;
+      if (!uploaded) return alert('no file selected');
+      setErrors([]);
 
-      const file = await har.text();
-      setHar(JSON.parse(file));
+      const { name } = uploaded;
+      setHar(undefined);
+
+      if (!/\.har$/.test(name)) return alert('Please upload a .har file');
+
+      const har = await uploaded.text();
+      setHar(JSON.parse(har));
    };
 
    const handleHarPaste = () => {
@@ -65,7 +70,7 @@ export const UploadPanel = ({ codes }: { codes: RegExp[] }) => {
                <span className="text-xl font-medium tracking-tighter mt-4">
                   {isFirstUpload ? 'Click to upload' : 'Clear HAR and upload'}
                </span>
-               <input className="place-self-center" ref={uploadRef} type="file" onChange={handleHarUpload} />
+               <input className="place-self-center" ref={uploadRef} type="file" accept=".har" onChange={handleHarUpload} />
             </label>
 
             <label className="flex flex-col items-center justify-center group ">
