@@ -35,11 +35,11 @@ export const usePagination = <T,>(arr: T[], desiredElements = 10) => {
    return { currentSlice, pagesToShow, handlePaginationClick };
 };
 
+type Pagination = ReturnType<typeof usePagination>;
+
 /* Component */
 
-interface PaginationBarProps {
-   handlePaginationClick: (item: PaginationItem) => void;
-   pagesToShow: (string | number)[];
+interface PaginationBarProps extends Pagination {
    className?: string;
 }
 

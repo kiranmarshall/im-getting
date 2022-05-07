@@ -1,1 +1,3 @@
-export * from './useHeaders'
+export * from './useHeaders';
+export * from './usePagination';
+export * from './useStatusCodes';
