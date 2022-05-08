@@ -51,33 +51,14 @@ const RequestPanel = ({ data }: { data: Request }) => {
    const [heads, headsToLog, handleAdd, handleRemove, transformedHeads] = useHeaders(headers);
    const [cookies, cookiesToLog, handleAddCookies, handleRemoveCookies, transformedCookies] = useHeaders(cooks);
 
-   // const [allHeadsToLog, setAllHeadsToLog] = useState<ObjectRecord[]>([]);
-
    const [expanded, setExpanded] = useState(false);
    const [cookiesExpanded, setCookiesExpanded] = useState(false);
 
-   const { addHeaderToMarkdown, setAllReqHeaders } = useMarkdown();
+   const { setAllReqHeaders } = useMarkdown();
 
    useEffect(() => {
       setAllReqHeaders([...transformedHeads, ...transformedCookies]);
    }, [transformedHeads, transformedCookies]);
-
-   // useEffect(() => {
-   //    setAllHeadsToLog([...transformedHeads, ...transformedCookies]);
-   // }, [transformedCookies, transformedHeads]);
-
-   // useEffect(() => {
-   //    addHeaderToMarkdown(allHeadsToLog);
-   // }, [allHeadsToLog]);
-
-   // useEffect(() => {
-   //    addHeaderToMarkdown([transformedHeads, transformedCookies]);
-   // }, [transformedHeads, transformedCookies]);
-
-   // useEffect(() => {
-   //    addHeaderToMarkdown(transformedHeads);
-   //    addHeaderToMarkdown(transformedCookies);
-   // }, [transformedHeads, transformedCookies]);
 
    return (
       <PanelContainer>
@@ -180,28 +161,11 @@ const ResponsePanel = ({ data }: { data: Response }) => {
    const [expanded, setExpanded] = useState(false);
    const [cookiesExpanded, setCookiesExpanded] = useState(false);
 
-   const { addHeaderToMarkdown, setAllResHeaders } = useMarkdown();
+   const { setAllResHeaders } = useMarkdown();
 
    useEffect(() => {
       setAllResHeaders([...transformedHeads, ...transformedCookies]);
    }, [transformedHeads, transformedCookies]);
-
-   // useEffect(() => {
-   //    setAllHeadsToLog([...transformedHeads, ...transformedCookies]);
-   // }, [transformedCookies, transformedHeads]);
-
-   // useEffect(() => {
-   //    addHeaderToMarkdown(allHeadsToLog);
-   // }, [allHeadsToLog]);
-
-   // useEffect(() => {
-   //    addHeaderToMarkdown([transformedHeads, transformedCookies]);
-   // }, [transformedHeads, transformedCookies]);
-
-   // useEffect(() => {
-   //    addHeaderToMarkdown(transformedHeads);
-   //    addHeaderToMarkdown(transformedCookies);
-   // }, [transformedHeads, transformedCookies]);
 
    return (
       <PanelContainer>
