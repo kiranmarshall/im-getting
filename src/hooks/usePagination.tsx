@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 /* Types */
 
@@ -16,6 +16,7 @@ const calculatePaginationBar = (totalPages: number, currentIndex: number): Pagin
 
 export const usePagination = <T,>(arr: T[], desiredElements = 10) => {
    const [index, setIndex] = useState(0);
+   useEffect(() => setIndex(0), [arr]);
 
    const length = arr.length;
    const numberOfPages = Math.floor(length / desiredElements);
