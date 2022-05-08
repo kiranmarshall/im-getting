@@ -1,12 +1,15 @@
-import { createContext, FC, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, Dispatch, FC, SetStateAction, useContext, useEffect, useMemo, useState } from 'react';
 import { isEqual, uniqWith } from 'lodash';
 import { ObjectRecord } from '@/hooks';
 
 interface MarkdownContext {
    markdown: Record<string, any>;
-   setMarkdown: React.Dispatch<React.SetStateAction<Record<string, any>>>;
-   setDefaultMarkdown: React.Dispatch<React.SetStateAction<Record<string, any>>>;
-   addHeaderToMarkdown: (headers: ObjectRecord[][]) => void;
+   setMarkdown: Dispatch<SetStateAction<Record<string, any>>>;
+   setDefaultMarkdown: Dispatch<SetStateAction<Record<string, any>>>;
+   setAllReqHeaders: Dispatch<SetStateAction<ObjectRecord[]>>;
+   setAllResHeaders: Dispatch<SetStateAction<ObjectRecord[]>>;
+   // addHeaderToMarkdown: (headers: ObjectRecord[][]) => void;
+   addHeaderToMarkdown: (headers: ObjectRecord[]) => void;
    renderedMarkdown: string;
 }
 
@@ -17,14 +20,25 @@ export const MarkdownProvider: FC = (props) => {
    const [defaultMarkdown, setDefaultMarkdown] = useState<ObjectRecord>({});
    const [headersToAdd, setHeadersToAdd] = useState<ObjectRecord[]>([]);
 
-   const addHeaderToMarkdown = (headers: ObjectRecord[]) => {
-      const flattenedHeads = headers.flatMap((h) => h);
+   const [allReqHeaders, setAllReqHeaders] = useState<ObjectRecord[]>([]);
+   const [allResHeaders, setAllResHeaders] = useState<ObjectRecord[]>([]);
 
-      return setHeadersToAdd((prevHeaders) => {
-         const unique = uniqWith([...prevHeaders, ...flattenedHeads], isEqual);
-         return unique;
-      });
+   console.log({ allReqHeaders, allResHeaders });
+
+   const addHeaderToMarkdown = (headers: ObjectRecord[]) => {
+      // const flattenedHeads = headers.flatMap((h) => h);
+
+      // return setHeadersToAdd((prevHeaders) => {
+      //    const unique = uniqWith([...flattenedHeads], isEqual);
+      //    return unique;
+      // });
+
+      return null;
    };
+
+   useEffect(() => {
+      setHeadersToAdd([...allReqHeaders, ...allResHeaders]);
+   }, [allReqHeaders, allResHeaders]);
 
    useEffect(() => {
       setMarkdown(() => Object.assign({}, defaultMarkdown, ...headersToAdd));
@@ -32,7 +46,7 @@ export const MarkdownProvider: FC = (props) => {
 
    const renderedMarkdown = useMemo(() => renderMarkdown(markdown), [markdown]);
 
-   const ctx = { markdown, setMarkdown, setDefaultMarkdown, addHeaderToMarkdown, renderedMarkdown };
+   const ctx = { markdown, setMarkdown, setDefaultMarkdown, addHeaderToMarkdown, renderedMarkdown, setAllResHeaders, setAllReqHeaders };
 
    return <Context.Provider value={ctx} {...props} />;
 };
