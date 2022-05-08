@@ -79,14 +79,26 @@ const RequestPanel = ({ data }: { data: Request }) => {
          <Method method={method} />
          <Url url={url} />
 
-         <div className="flex items-start ">
-            <span className=" min-w-fit mr-2">payload: </span>
-            <span className="max-h-8 overflow-hidden">{postData?.text ?? 'No Payload'}</span>
+         <div className="overflow-hidden grid grid-cols-[auto,1fr] pr-2 ">
+            <span className="min-w-fit mr-2">payload: </span>
+            <span className="max-w-full truncate">{postData?.text ?? 'No Payload'}</span>
          </div>
 
-         {headsToLog.map((header, index) => (
-            <AddedHeader key={`${header.name}${index}`} name={header.name} value={header.value} onClick={() => handleRemove(header)} />
-         ))}
+         {!!headsToLog.length && (
+            <div className="border w-full py-2 px-1">
+               <p className="font-medium mb-2">Added Headers</p>
+               <div className="flex-flex-col space-y-1">
+                  {headsToLog.map((header, index) => (
+                     <AddedHeader
+                        key={`${header.name}${index}`}
+                        name={header.name}
+                        value={header.value}
+                        onClick={() => handleRemove(header)}
+                     />
+                  ))}
+               </div>
+            </div>
+         )}
 
          {expanded && (
             <PanelList>
@@ -102,14 +114,21 @@ const RequestPanel = ({ data }: { data: Request }) => {
             </PanelList>
          )}
 
-         {cookiesToLog.map((header, index) => (
-            <AddedHeader
-               key={`${header.name}${index}`}
-               name={header.name}
-               value={header.value}
-               onClick={() => handleRemoveCookies(header)}
-            />
-         ))}
+         {!!cookiesToLog.length && (
+            <div className="border w-full py-2 px-1">
+               <p className="font-medium mb-2">Added Cookies</p>
+               <div className="flex-flex-col space-y-1">
+                  {cookiesToLog.map((header, index) => (
+                     <AddedHeader
+                        key={`${header.name}${index}`}
+                        name={header.name}
+                        value={header.value}
+                        onClick={() => handleRemoveCookies(header)}
+                     />
+                  ))}
+               </div>
+            </div>
+         )}
 
          {cookiesExpanded && (
             <PanelList>
@@ -145,8 +164,8 @@ const ResponsePanel = ({ data }: { data: Response }) => {
    const { addHeaderToMarkdown } = useMarkdown();
 
    useEffect(() => {
-      addHeaderToMarkdown([transformedHeads]);
-   }, [transformedHeads]);
+      addHeaderToMarkdown([transformedHeads, transformedCookies]);
+   }, [transformedHeads, transformedCookies]);
 
    return (
       <PanelContainer>
@@ -166,14 +185,26 @@ const ResponsePanel = ({ data }: { data: Response }) => {
 
          {status && <Status status={status.toString()} />}
 
-         <div className="flex items-start ">
+         <div className="overflow-hidden grid grid-cols-[auto,1fr] pr-2 ">
             <span className=" min-w-fit mr-2">payload: </span>
-            <span className="max-h-8 overflow-hidden">{content.text ?? 'No Payload'}</span>
+            <span className="max-w-full truncate">{content.text ?? 'No Payload'}</span>
          </div>
 
-         {headsToLog.map((header, index) => (
-            <AddedHeader key={`${header.name}${index}`} name={header.name} value={header.value} onClick={() => handleRemove(header)} />
-         ))}
+         {!!headsToLog.length && (
+            <div className="border w-full py-2 px-1">
+               <p className="font-medium mb-2">Added Headers</p>
+               <div className="flex-flex-col space-y-1">
+                  {headsToLog.map((header, index) => (
+                     <AddedHeader
+                        key={`${header.name}${index}`}
+                        name={header.name}
+                        value={header.value}
+                        onClick={() => handleRemove(header)}
+                     />
+                  ))}
+               </div>
+            </div>
+         )}
 
          {expanded && (
             <PanelList>
@@ -189,14 +220,21 @@ const ResponsePanel = ({ data }: { data: Response }) => {
             </PanelList>
          )}
 
-         {cookiesToLog.map((header, index) => (
-            <AddedHeader
-               key={`${header.name}${index}`}
-               name={header.name}
-               value={header.value}
-               onClick={() => handleRemoveCookies(header)}
-            />
-         ))}
+         {!!cookiesToLog.length && (
+            <div className="border w-full py-2 px-1">
+               <p className="font-medium mb-2">Added Cookies</p>
+               <div className="flex-flex-col space-y-1">
+                  {cookiesToLog.map((header, index) => (
+                     <AddedHeader
+                        key={`${header.name}${index}`}
+                        name={header.name}
+                        value={header.value}
+                        onClick={() => handleRemoveCookies(header)}
+                     />
+                  ))}
+               </div>
+            </div>
+         )}
 
          {cookiesExpanded && (
             <PanelList>
@@ -222,10 +260,12 @@ const ResponsePanel = ({ data }: { data: Response }) => {
 
 const AddedHeader = ({ name, value, onClick }: { name: string; value: string; onClick: () => void }) => {
    return (
-      <button onClick={onClick} className="overflow-hidden flex items-center">
-         <span className="whitespace-nowrap px-1 py-1 bg-gray-100 rounded-sm mr-1">{name}: </span>
-         <span className="text-left">{value}</span>
-      </button>
+      <div className="overflow-hidden grid grid-cols-[auto,1fr]">
+         <button onClick={onClick} className="whitespace-nowrap place-self-center px-1 py-1 bg-gray-100 rounded-sm mr-1">
+            {name}:{' '}
+         </button>
+         <span className="text-left self-center max-w-full truncate">{value}</span>
+      </div>
    );
 };
 
@@ -261,8 +301,8 @@ const statusBgColorResolver = (type: string) => {
 
 const Status = ({ status }: { status: string }) => {
    return (
-      <div className="flex items-center">
-         <span className="mr-2">status:</span>
+      <div className="overflow-hidden grid grid-cols-[auto,1fr] pr-2 ">
+         <span className="mr-2 place-self-center">status:</span>
          <span className={`px-1 py-1 rounded-sm text-white ${statusBgColorResolver(status)}`}>{status}</span>
       </div>
    );
@@ -270,17 +310,17 @@ const Status = ({ status }: { status: string }) => {
 
 const Method = ({ method }: { method: string }) => {
    return (
-      <div className="flex items-center">
-         <span className="mr-2">method:</span>
+      <div className="overflow-hidden grid grid-cols-[auto,1fr] pr-2 ">
+         <span className="mr-2 place-self-center">method:</span>
          <span className={`px-1 py-1 rounded-sm ${methodBgColorResolver(method)}`}>{method}</span>
       </div>
    );
 };
 
 const Url = ({ url }: { url: string }) => (
-   <div className="flex items-start ">
-      <span className=" min-w-fit mr-2">url: </span>
-      <span className="max-h-8 overflow-hidden">{url}</span>
+   <div className="overflow-hidden grid grid-cols-[auto,1fr] pr-2">
+      <span className="min-w-fit mr-2">url: </span>
+      <span className="max-w-full truncate">{url}</span>
    </div>
 );
 
@@ -291,7 +331,7 @@ interface AddButtonProps extends HTMLAttributes<HTMLButtonElement> {
    disabled: boolean;
 }
 
-const AddButton: FC<AddButtonProps> = ({ onClick, expanded, type, disabled }) => {
+const AddButton = ({ onClick, expanded, type, disabled }: AddButtonProps) => {
    const baseClass = 'font-sans rounded-md text-xs px-2 py-1 transition-colors capitalize disabled:bg-red-50';
 
    return (
