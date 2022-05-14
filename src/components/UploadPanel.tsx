@@ -55,21 +55,21 @@ export const UploadPanel = ({ codes }: { codes: RegExp[] }) => {
    }, [har, codes]);
 
    return (
-      <div className="ml-8 flex-grow my-auto">
-         <div className="grid grid-cols-2 h-40">
-            <label className="flex flex-col items-center justify-center group cursor-pointer">
-               <div className="text-7xl h-20 w-20 group-hover:scale-105 transition-transform">{isFirstUpload ? '⬆️' : '🔁'}</div>
-               <span className="text-xl font-medium tracking-tighter mt-4">
+      <div className="flex-grow my-auto ml-8">
+         <div className="grid h-40 grid-cols-2 ">
+            <label className="flex flex-col items-center justify-center cursor-pointer group">
+               <div className="w-20 h-20 transition-transform text-7xl group-hover:scale-105">{isFirstUpload ? '⬆️' : '🔁'}</div>
+               <span className="mt-4 text-xl font-medium tracking-tighter">
                   {isFirstUpload ? 'Click to upload' : 'Clear HAR and upload'}
                </span>
                <input className="place-self-center" ref={uploadRef} type="file" accept=".har" onChange={handleHarUpload} />
             </label>
 
             <label className="flex flex-col items-center justify-center group ">
-               <div className="bg-white rounded-full h-20 w-20 flex  items-center justify-center overflow-hidden cursor-text group-hover:scale-105 transition-transform">
+               <div className="flex items-center justify-center w-20 h-20 overflow-hidden transition-transform bg-white rounded-full cursor-text group-hover:scale-105">
                   <textarea className="custom-text-area" ref={pasteRef} onChange={handleHarPaste} />
                </div>
-               <span className=" text-xl font-medium tracking-tighter mt-4">Paste HAR here</span>
+               <span className="mt-4 text-xl font-medium tracking-tighter ">Paste HAR here</span>
             </label>
          </div>
       </div>

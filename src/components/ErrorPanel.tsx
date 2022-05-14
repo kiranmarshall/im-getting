@@ -1,6 +1,6 @@
-import { BaseSyntheticEvent, FC, HTMLAttributes, useEffect, useState } from 'react';
+import { BaseSyntheticEvent, FC, HTMLAttributes, useEffect, useRef, useState } from 'react';
 import { Entry, Request, Response } from 'har-format';
-import { errorTypes, ObjectRecord, useHeaders } from '@/hooks';
+import { errorTypes, useHeaders } from '@/hooks';
 import { useErrors, useMarkdown } from '@/contexts';
 
 enum HTTPMethods {
@@ -25,22 +25,47 @@ export const ErrorPanel = (error: Entry) => {
    }, [error]);
 
    return (
-      <div className="bg-gray-200 rounded-md px-4 py-2 ">
-         <div className=" flex">
-            <div className=" pt-2 mx-4 flex flex-col space-y-2 ">
-               <button className="" onClick={() => removeError(error)}>
-                  ❌
-               </button>
-               <button onClick={() => navigator.clipboard.writeText(renderedMarkdown)}>🗒️</button>
+      <div className="px-4 py-2 bg-gray-200 rounded-md ">
+         <div className="flex ">
+            <div className="flex flex-col pt-2 mx-4 mr-6 space-y-2 ">
+               <WithToolTip label="remove">
+                  <ActionButton onClick={() => removeError(error)}>❌</ActionButton>
+               </WithToolTip>
+
+               <WithToolTip label="Copy markdown to clipboard">
+                  <ActionButton onClick={() => navigator.clipboard.writeText(renderedMarkdown)}>🗒️</ActionButton>
+               </WithToolTip>
             </div>
 
-            <div className=" flex-grow flex flex-col ">
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
+            <div className="flex flex-col flex-grow ">
+               <div className="grid grid-cols-1 gap-4 font-mono text-xs sm:grid-cols-2">
                   <RequestPanel data={request} />
                   <ResponsePanel data={response} />
                </div>
             </div>
          </div>
+      </div>
+   );
+};
+
+const ActionButton: FC<HTMLAttributes<HTMLButtonElement>> = (props) => {
+   return <button className="text-xl transition-transform duration-100 hover:scale-110" {...props} />;
+};
+
+const WithToolTip: FC<{ label: string }> = ({ children, label }) => {
+   const [shown, setShown] = useState(false);
+
+   return (
+      <div onMouseEnter={() => setShown(true)} onMouseLeave={() => setShown(false)}>
+         <div className="absolute">
+            {shown && (
+               <span className="relative px-2 py-1 text-xs uppercase bg-gray-700 rounded-md text-gray-50 whitespace-nowrap bottom-6">
+                  {label}
+               </span>
+            )}
+         </div>
+
+         {children}
       </div>
    );
 };
@@ -62,10 +87,10 @@ const RequestPanel = ({ data }: { data: Request }) => {
 
    return (
       <PanelContainer>
-         <div className="w-full flex items-center">
+         <div className="flex items-center w-full">
             <PanelHead>Request</PanelHead>
 
-            <div className="ml-auto felx items-center space-x-4">
+            <div className="items-center ml-auto space-x-4 felx">
                <AddButton expanded={expanded} onClick={() => setExpanded((e) => !e)} type="headers" disabled={!heads.length} />
                <AddButton
                   expanded={cookiesExpanded}
@@ -80,14 +105,14 @@ const RequestPanel = ({ data }: { data: Request }) => {
          <Url url={url} />
 
          <div className="overflow-hidden grid grid-cols-[auto,1fr] pr-2 ">
-            <span className="min-w-fit mr-2">payload: </span>
+            <span className="mr-2 min-w-fit">payload: </span>
             <span className="max-w-full truncate">{postData?.text ?? 'No Payload'}</span>
          </div>
 
          {!!headsToLog.length && (
-            <div className="border w-full py-2 px-1">
-               <p className="font-medium mb-2">Added Headers</p>
-               <div className="flex-flex-col space-y-1">
+            <div className="w-full px-1 py-2 border">
+               <p className="mb-2 font-medium">Added Headers</p>
+               <div className="space-y-1 flex-flex-col">
                   {headsToLog.map((header, index) => (
                      <AddedHeader
                         key={`${header.name}${index}`}
@@ -115,9 +140,9 @@ const RequestPanel = ({ data }: { data: Request }) => {
          )}
 
          {!!cookiesToLog.length && (
-            <div className="border w-full py-2 px-1">
-               <p className="font-medium mb-2">Added Cookies</p>
-               <div className="flex-flex-col space-y-1">
+            <div className="w-full px-1 py-2 border">
+               <p className="mb-2 font-medium">Added Cookies</p>
+               <div className="space-y-1 flex-flex-col">
                   {cookiesToLog.map((header, index) => (
                      <AddedHeader
                         key={`${header.name}${index}`}
@@ -169,10 +194,10 @@ const ResponsePanel = ({ data }: { data: Response }) => {
 
    return (
       <PanelContainer>
-         <div className="w-full flex items-center">
+         <div className="flex items-center w-full">
             <PanelHead>Response</PanelHead>
 
-            <div className="ml-auto felx items-center space-x-4">
+            <div className="items-center ml-auto space-x-4 felx">
                <AddButton expanded={expanded} onClick={() => setExpanded((e) => !e)} type="headers" disabled={!heads.length} />
                <AddButton
                   expanded={cookiesExpanded}
@@ -186,14 +211,14 @@ const ResponsePanel = ({ data }: { data: Response }) => {
          {status && <Status status={status.toString()} />}
 
          <div className="overflow-hidden grid grid-cols-[auto,1fr] pr-2 ">
-            <span className=" min-w-fit mr-2">payload: </span>
+            <span className="mr-2 min-w-fit">payload: </span>
             <span className="max-w-full truncate">{content.text ?? 'No Payload'}</span>
          </div>
 
          {!!headsToLog.length && (
-            <div className="border w-full py-2 px-1">
-               <p className="font-medium mb-2">Added Headers</p>
-               <div className="flex-flex-col space-y-1">
+            <div className="w-full px-1 py-2 border">
+               <p className="mb-2 font-medium">Added Headers</p>
+               <div className="space-y-1 flex-flex-col">
                   {headsToLog.map((header, index) => (
                      <AddedHeader
                         key={`${header.name}${index}`}
@@ -221,9 +246,9 @@ const ResponsePanel = ({ data }: { data: Response }) => {
          )}
 
          {!!cookiesToLog.length && (
-            <div className="border w-full py-2 px-1">
-               <p className="font-medium mb-2">Added Cookies</p>
-               <div className="flex-flex-col space-y-1">
+            <div className="w-full px-1 py-2 border">
+               <p className="mb-2 font-medium">Added Cookies</p>
+               <div className="space-y-1 flex-flex-col">
                   {cookiesToLog.map((header, index) => (
                      <AddedHeader
                         key={`${header.name}${index}`}
@@ -261,10 +286,10 @@ const ResponsePanel = ({ data }: { data: Response }) => {
 const AddedHeader = ({ name, value, onClick }: { name: string; value: string; onClick: () => void }) => {
    return (
       <div className="overflow-hidden grid grid-cols-[auto,1fr]">
-         <button onClick={onClick} className="whitespace-nowrap place-self-center px-1 py-1 bg-gray-100 rounded-sm mr-1">
+         <button onClick={onClick} className="px-1 py-1 mr-1 bg-gray-100 rounded-sm whitespace-nowrap place-self-center">
             {name}:{' '}
          </button>
-         <span className="text-left self-center max-w-full truncate">{value}</span>
+         <span className="self-center max-w-full text-left truncate">{value}</span>
       </div>
    );
 };
@@ -275,9 +300,9 @@ const HeaderToAdd = ({ header, onClick, picked }: { header: string; onClick: (e:
    </button>
 );
 
-const PanelContainer: FC = (props) => <div className="flex flex-col space-y-2 p-2 items-start line-wrap bg-white rounded-md" {...props} />;
-const PanelHead: FC = (props) => <h1 className=" font-sans font-semibold text-xl" {...props} />;
-const PanelList: FC = (props) => <ul className="flex flex-wrap bg-gray-50 p-1 rounded-md" {...props} />;
+const PanelContainer: FC = (props) => <div className="flex flex-col items-start p-2 space-y-2 bg-white rounded-md line-wrap" {...props} />;
+const PanelHead: FC = (props) => <h1 className="font-sans text-xl font-semibold " {...props} />;
+const PanelList: FC = (props) => <ul className="flex flex-wrap p-1 rounded-md bg-gray-50" {...props} />;
 
 const methodBgColorResolver = (type: string) => {
    const { DELETE, GET, OPTIONS, POST, PUT } = HTTPMethods;
@@ -319,7 +344,7 @@ const Method = ({ method }: { method: string }) => {
 
 const Url = ({ url }: { url: string }) => (
    <div className="overflow-hidden grid grid-cols-[auto,1fr] pr-2">
-      <span className="min-w-fit mr-2">url: </span>
+      <span className="mr-2 min-w-fit">url: </span>
       <span className="max-w-full truncate">{url}</span>
    </div>
 );
