@@ -12,7 +12,12 @@ export function useSearch<R extends Request, K extends keyof R>(
    const [searchResult, setSearchResult] = useState<Entry[]>(errors);
 
    useEffect(() => {
-      setSearchResult(errors.filter(({ request }) => request.url.match(debouncedSearch)));
+      setSearchResult(
+         errors.filter(({ request }) => {
+            const url = request.url.toLowerCase();
+            return url.match(debouncedSearch.toLowerCase());
+         })
+      );
    }, [debouncedSearch, errors, type]);
 
    return [searchResult, search, setSearch];
